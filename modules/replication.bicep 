@@ -1,0 +1,15 @@
+// Module to configure ADX cross-region replication
+param followerClusterName string
+param leaderClusterId string
+param databaseName string
+param location string
+
+resource adxFollowerConfig 'Microsoft.Kusto/clusters/attachedDatabaseConfigurations@2023-08-15' = {
+  name: '${followerClusterName}/followerConfig'
+  location: location
+  properties: {
+    clusterResourceId: leaderClusterId
+    databaseName: databaseName
+    attachedDatabaseNames: [databaseName]
+  }
+}

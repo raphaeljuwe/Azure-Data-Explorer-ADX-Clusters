@@ -1,0 +1,6 @@
+*.bicepparam *.azcli *.azure *.jsonc *.tgz bicepconfig.json /arm-template.json # Compiled ARM templates from Bicep 
+
+.DS_Store .AppleDouble .LSOverride ._* 
+
+
+*.lock node_modules/ coverage/ *.md5 *.sha1 *.sha256

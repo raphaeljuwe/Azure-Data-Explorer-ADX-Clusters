@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "regions": {
+      "value": ["eastus", "westus"]
+    },
+    "workspaceNamePrefix": {
+      "value": "log-analytics"
+    },
+    "adxClusterNamePrefix": {
+      "value": "adxcluster"
+    },
+    "adxDatabaseName": {
+      "value": "TelemetryDB"
+    },
+    "adxSkuName": {
+      "value": "Standard_D11_v2"
+    },
+    "adxCapacity": {
+      "value": 2
+    },
+    "logRetentionDays": {
+      "value": 90
+    },
+    "adxRetentionDays": {
+      "value": 90
+    },
+    "tags": {
+      "value": {
+        "environment": "Production",
+        "purpose": "RealTimeAnalytics"
+      }
+    }
+  }
+}

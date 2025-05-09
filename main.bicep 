@@ -1,0 +1,46 @@
+// Main template to orchestrate multi-region deployment
+param regions array = ['eastus', 'westus']
+param workspaceNamePrefix string = 'log-analytics'
+param adxClusterNamePrefix string = 'adxcluster'
+param adxDatabaseName string = 'TelemetryDB'
+param adxSkuName string = 'Standard_D11_v2'
+param adxCapacity int = 2
+param logRetentionDays int = 90
+param adxRetentionDays int = 90
+param tags object = {
+  environment: 'Production'
+  purpose: 'RealTimeAnalytics'
+}
+
+// Deploy resources per region
+module regionalDeployment './modules/regional-deployment.bicep' = [for (region, i) in regions: {
+  name: 'deploy-${region}-${i}'
+  params: {
+    location: region
+    workspaceName: '${workspaceNamePrefix}-${region}-${uniqueString(resourceGroup().id, region)}'
+    adxClusterName: '${adxClusterNamePrefix}-${region}-${uniqueString(resourceGroup().id, region)}'
+    adxDatabaseName: adxDatabaseName
+    adxSkuName: adxSkuName
+    adxCapacity: adxCapacity
+    logRetentionDays: logRetentionDays
+    adxRetentionDays: adxRetentionDays
+    tags: tags
+  }
+}]
+
+// Configure cross-region replication (leader-follower)
+module replication './modules/replication.bicep' = [for (region, i) in regions: if(i > 0) {
+  name: 'replication-${region}-${i}'
+  params: {
+    followerClusterName: '${adxClusterNamePrefix}-${region}-${uniqueString(resourceGroup().id, region)}'
+    leaderClusterId: regionalDeployment[0].outputs.adxClusterId
+    databaseName: adxDatabaseName
+    location: region
+  }
+  dependsOn: regionalDeployment
+}]
+
+// Outputs
+output logAnalyticsWorkspaceIds array = [for i in range(0, length(regions)): regionalDeployment[i].outputs.logAnalyticsWorkspaceId]
+output adxClusterUris array = [for i in range(0, length(regions)): regionalDeployment[i].outputs.adxClusterUri]
+output adxDatabaseNames array = [for i in range(0, length(regions)): regionalDeployment[i].outputs.adxDatabaseName]
